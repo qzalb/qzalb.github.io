@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>qzalb — soon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #8B1A1A;
+    --red-bright: #C0392B;
+    --fabric: #e8e4df;
+    --fabric-dark: #d4cfc9;
+    --thread: #b5302a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--fabric);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* === FABRIC TEXTURE === */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.015) 2px,
+        rgba(0,0,0,0.015) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.015) 2px,
+        rgba(0,0,0,0.015) 4px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* === CUSTOM CURSOR === */
+  .cursor {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    background: var(--red);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
+    mix-blend-mode: multiply;
+  }
+
+  /* === SVG FILTER for embroidery effect === */
+  .svg-filters { position: absolute; width: 0; height: 0; }
+
+  /* === MAIN LAYOUT === */
+  .page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+  }
+
+  /* === EMBROIDERY TEXT === */
+  .embroidery-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0px;
+  }
+
+  .stitch-text {
+    font-family: 'Bebas Neue', sans-serif;
+    color: var(--thread);
+    position: relative;
+    display: block;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    /* Embroidery effect */
+    text-shadow:
+      1px 1px 0px rgba(139,26,26,0.4),
+      -1px -1px 0px rgba(255,255,255,0.3),
+      2px 2px 3px rgba(0,0,0,0.15),
+      0 0 0 1px rgba(139,26,26,0.1);
+    filter: url(#embroidery);
+    -webkit-text-stroke: 1px rgba(139,26,26,0.2);
+  }
+
+  .stitch-text.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .text-soon {
+    font-size: clamp(100px, 22vw, 280px);
+    transition-delay: 0.1s;
+  }
+
+  .text-qzalb {
+    font-size: clamp(60px, 13vw, 170px);
+    color: var(--red);
+    letter-spacing: 0.15em;
+    transition-delay: 0.35s;
+    text-shadow:
+      1px 1px 0px rgba(139,26,26,0.6),
+      -1px -1px 0px rgba(255,255,255,0.4),
+      3px 3px 6px rgba(0,0,0,0.2),
+      0 0 0 2px rgba(139,26,26,0.15);
+  }
+
+  /* === THREAD LINES decoration === */
+  .thread-line {
+    width: 60px;
+    height: 3px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--thread) 0px,
+      var(--thread) 5px,
+      transparent 5px,
+      transparent 8px
+    );
+    border-radius: 2px;
+    opacity: 0;
+    transform: scaleX(0);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transition-delay: 0.6s;
+    margin: 16px 0;
+  }
+
+  .thread-line.visible {
+    opacity: 0.7;
+    transform: scaleX(1);
+  }
+
+  /* === BOTTOM TAG === */
+  .tag {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: rgba(139,26,26,0.5);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.2s forwards;
+  }
+
+  /* === SCROLL SECTION (second screen) === */
+  .section-2 {
+    position: relative;
+    z-index: 1;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+  }
+
+  .info-block {
+    text-align: center;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+
+  .info-block.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .info-label {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(10px, 2vw, 13px);
+    letter-spacing: 0.4em;
+    color: rgba(139,26,26,0.5);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .info-domain {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 8vw, 90px);
+    color: var(--thread);
+    letter-spacing: 0.1em;
+    text-shadow:
+      1px 1px 0px rgba(139,26,26,0.3),
+      -1px -1px 0px rgba(255,255,255,0.3),
+      2px 2px 4px rgba(0,0,0,0.1);
+    filter: url(#embroidery);
+  }
+
+  .info-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(9px, 1.5vw, 11px);
+    letter-spacing: 0.3em;
+    color: rgba(139,26,26,0.35);
+    text-transform: uppercase;
+    margin-top: 16px;
+  }
+
+  /* === STITCH BORDER decoration === */
+  .stitch-border {
+    position: fixed;
+    inset: 16px;
+    border: 2px dashed rgba(139,26,26,0.15);
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* corner dots */
+  .stitch-border::before,
+  .stitch-border::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(139,26,26,0.25);
+  }
+  .stitch-border::before { top: -4px; left: -4px; }
+  .stitch-border::after { bottom: -4px; right: -4px; }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  /* === SCROLL HINT === */
+  .scroll-hint {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.5s forwards;
+  }
+
+  .scroll-hint span {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: rgba(139,26,26,0.4);
+    text-transform: uppercase;
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 30px;
+    background: linear-gradient(to bottom, rgba(139,26,26,0.4), transparent);
+    animation: scrollPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { transform: scaleY(1); opacity: 1; }
+    50% { transform: scaleY(0.6); opacity: 0.4; }
+  }
+
+  /* === MOBILE === */
+  @media (max-width: 600px) {
+    .stitch-border { inset: 10px; }
+    .tag { font-size: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+
+<!-- SVG Embroidery filter -->
+<svg class="svg-filters">
+  <defs>
+    <filter id="embroidery" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04 0.06" numOctaves="3" seed="5" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feComposite in="displaced" in2="SourceGraphic" operator="atop"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- Stitch border frame -->
+<div class="stitch-border"></div>
+
+<!-- SECTION 1 — Main -->
+<section class="page">
+  <div class="embroidery-wrap">
+    <span class="stitch-text text-soon" id="soon">soon...</span>
+    <div class="thread-line" id="line"></div>
+    <span class="stitch-text text-qzalb" id="qzalb">qzalb</span>
+  </div>
+
+  <div class="scroll-hint">
+    <span>scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- SECTION 2 — Info -->
+<section class="section-2">
+  <div class="info-block" id="info">
+    <p class="info-label">coming to</p>
+    <p class="info-domain">qzalb.com</p>
+    <p class="info-sub">design · brand · identity</p>
+  </div>
+</section>
+
+<!-- Bottom tag -->
+<div class="tag">© qzalb — all rights reserved</div>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+
+  // Intersection Observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.stitch-text, .thread-line, .info-block').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Trigger first section immediately
+  setTimeout(() => {
+    document.getElementById('soon').classList.add('visible');
+    setTimeout(() => document.getElementById('line').classList.add('visible'), 300);
+    setTimeout(() => document.getElementById('qzalb').classList.add('visible'), 400);
+  }, 200);
+
+  // Subtle fabric parallax on mouse move
+  document.addEventListener('mousemove', e => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 8;
+    const y = (e.clientY / window.innerHeight - 0.5) * 8;
+    document.querySelector('.embroidery-wrap').style.transform =
+      `translate(${x * 0.3}px, ${y * 0.3}px)`;
+  });
+</script>
+</body>
+</html>
